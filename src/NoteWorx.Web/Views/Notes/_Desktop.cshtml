@@ -1,0 +1,63 @@
+@model NotesViewModel
+
+<div class="hide-mobile mt-3">
+   <div class="table-responsive">      
+      <table class="table table-striped table-hover" style="overflow: hidden">
+         <thead>
+            <tr class="d-flex mt-3">
+               <th class="col-1 text-center">
+                  <div class="form-check">
+                     <input type="checkbox" class="form-check-input" onclick="toggleSelectedNotes()">
+                  </div>
+               </th>
+               <th class="col-3">Title</th>
+               <th class="col-5">Description</th>
+               <th class="col-2">Date</th>
+               <th class="col-1"></th>
+            </tr>
+         </thead>
+         <tbody>
+            @foreach(var note in Model.Notes)
+            {
+               <tr class="d-flex">
+                  <td class="col-1 text-center">
+                     <input id="note-@note.Id"
+                        data-note-id="@note.Id"
+                        type="checkbox"
+                        onclick="toggleSelectedNote()">                     
+                  </td>
+                  <td class="col-3">@note.Title</td>
+                  <td class="col-5">
+                     <div>
+                        @note.Description.Truncate(100)
+                     </div>
+                     <div>
+                        <nav class="nav nav-justified">
+                           @foreach(var tag in note.Tags)
+                           {                        
+                              <a asp-action="Index" 
+                                 asp-route-tag="@tag.Value.Trim()"
+                                 asp-route-search="@ViewBag.Search"
+                                 class="nav-link">
+                                 <h6>
+                                    <span class="badge badge-info">@tag.Value.Trim()</span>
+                                 </h6>
+                              </a>
+                           }
+                        </nav>
+                     </div>
+                  </td>
+                  <td class="col-2">@note.ModifiedAt.Humanize()</td>
+                  <td class="col-1">
+                     <a asp-contoller="Notes" 
+                        asp-action="EditNote"
+                        asp-route-noteId="@note.Id">
+                        <small>EDIT</small>
+                     </a>
+                  </td>
+               </tr>                  
+            }
+         </tbody>
+      </table>
+   </div>
+</div>

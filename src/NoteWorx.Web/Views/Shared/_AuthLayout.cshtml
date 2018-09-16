@@ -1,0 +1,82 @@
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+@using NoteWorx.Infrastructure.Data.Models
+
+@inject UserManager<AppUser> UserManager
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - NoteWorx</title>
+
+    <environment include="Development">
+        <link rel="stylesheet" href="~/node_modules/bootstrap/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="~/node_modules/@@fortawesome/fontawesome-free/css/all.min.css">
+        <link rel="stylesheet" href="~/css/site.css" />
+    </environment>
+
+    <environment include="Production">
+        <link rel="stylesheet" href="~/lib/css/bootstrap.min.css" asp-append-version="true">
+        <link rel="stylesheet" href="~/lib/css/font-awesome.min.css" asp-append-version="true">
+        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true">
+    </environment>
+</head>
+<body>
+    <div class="container">
+       <nav class="navbar navbar-expand-lg navbar-light bg-light">         
+         <a asp-controller="Notes" asp-action="Index" class="navbar-brand text-primary">
+            <i class="fa fa-book-open fa-2x mr-2 text-primary"></i>
+            NOTEWORX
+         </a>
+         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#menu">
+            <span class="navbar-toggler-icon"></span>
+         </button>
+
+         <div class="collapse navbar-collapse" id="menu">
+            <form asp-controller="Account" asp-action="Logout" class="my-2 ml-auto my-lg-0">                
+                  <ul class="navbar-nav">
+                     <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-toggle="dropdown">
+                              <div class="d-inline d-lg-none">ACCOUNT</div>
+                              <div class="d-none d-lg-inline">
+                                 <span class="fa-stack">
+                                 <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                 <i class="fas fa-user fa-stack-1x fa-inverse"></i>
+                                 </span>
+                                 @UserManager.GetUserName(User)
+                              </div>
+                              
+                        </a>
+                        <div class="dropdown-menu">
+                              <button type="submit" class="dropdown-item btn btn-link">Logout</button>
+                        </div>                        
+                     </li>
+                  </ul>
+            </form>
+         </div>
+        </nav>
+    </div>
+    
+    <div class="container">
+        @RenderBody()
+    </div>
+
+    <environment include="Development, Production">
+        <script src="~/node_modules/jquery/dist/jquery.min.js"></script>
+        <script src="~/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="~/node_modules/popper.js/dist/popper.min.js"></script>
+        <script src="~/js/site.js"></script>
+    </environment>
+
+    <environment include="Production">
+        <script src="~/lib/js/jquery.min.js" asp-append-version="true"></script>
+        <script src="~/lib/js/bootstrap.min.js" asp-append-version="true"></script>
+        <script src="~/lib/js/popper.min.js" asp-append-version="true"></script>
+        <script src="~/js/site.min.js" asp-append-version="true"></script>
+    </environment>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

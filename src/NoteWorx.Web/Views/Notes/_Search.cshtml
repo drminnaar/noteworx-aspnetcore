@@ -1,0 +1,20 @@
+@model NotesViewModel
+
+<form asp-controller="Notes" asp-action="Index" method="GET">
+   <div class="input-group">
+      <input asp-for="Search"
+         type="text"
+         name="Search"
+         class="form-control"
+         placeholder="Enter search term here">
+
+      <div class="input-group-append">
+         <button type="submit"
+            asp-controller="Notes"
+            asp-action="Index"            
+            class="btn btn-outline-secondary">
+            SEARCH
+         </button>
+      </div>
+   </div>
+</form>

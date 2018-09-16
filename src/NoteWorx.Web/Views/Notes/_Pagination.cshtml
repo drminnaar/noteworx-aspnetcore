@@ -1,0 +1,41 @@
+@model System.Collections.Generic.IPagedList<NoteModel>
+
+<div>
+   <nav>
+      <ul class="pagination">
+         @{
+            var previousPageClass = Model.HasPrevious
+               ? "page-item"
+               : "page-item disabled";
+            
+            <li class="@previousPageClass">
+               <a asp-controller="Notes" 
+                  asp-action="Index"
+                  asp-route-pageNumber="@Model.PreviousPageNumber"
+                  asp-route-search="@ViewBag.Search"
+                  asp-route-tag="@ViewBag.Tag"
+                  class="page-link">
+                  <i class="fas fa-angle-left"></i>
+               </a>
+            </li>
+         
+            
+
+            var nextPageClass = Model.HasNext
+               ? "page-item"
+               : "page-item disabled";
+
+            <li class="@nextPageClass">
+               <a asp-controller="Notes"
+                  asp-action="Index"
+                  asp-route-pageNumber="@Model.NextPageNumber"
+                  asp-route-search="@ViewBag.Search"
+                  asp-route-tag="@ViewBag.Tag"
+                  class="page-link">
+                  <i class="fas fa-angle-right"></i>
+               </a>
+            </li>
+         }
+      </ul>
+   </nav>
+</div>

@@ -1,0 +1,27 @@
+version: '3'
+services:
+   db-dev:
+      container_name: db-dev
+      image: postgres
+      restart: always
+      environment:
+         - POSTGRES_USER=postgres
+         - POSTGRES_PASSWORD=password
+         - POSTGRES_DB=postgres
+      ports:
+         - 5432:5432
+      networks:
+         - notenet-dev
+   db-admin-dev:
+      container_name: db-admin-dev
+      image: dpage/pgadmin4
+      restart: always
+      environment:
+         - PGADMIN_DEFAULT_EMAIL=admin@noteworx.com
+         - PGADMIN_DEFAULT_PASSWORD=password
+      ports:
+         - 8081:80
+      networks:
+         - notenet-dev
+networks:
+   notenet-dev:

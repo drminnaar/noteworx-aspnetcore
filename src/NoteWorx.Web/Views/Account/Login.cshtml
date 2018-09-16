@@ -1,0 +1,62 @@
+@model LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div>
+    <div class="light-overlay">
+        <div class="login-card">
+            <div class="card">
+                <div class="text-center mt-3">
+                    <span class="fa-stack fa-2x">
+                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                        <i class="fas fa-user-lock fa-stack-1x fa-inverse"></i>
+                    </span>
+                    <div class="my-2 text-primary">
+                        <h3>NOTEWORX LOGIN</h3>
+                    </div>
+                </div>
+                <div class="card-body">
+                   @if (ViewBag.Registered != null && ViewBag.Registered)
+                   {
+                      <p class="lead my-3 text-success text-center">You have registered successfully!</p>
+                   }
+                    <form asp-controller="Account" asp-action="Login" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                           <input asp-for="Email" type="text" name="Email" class="form-control" placeholder="Email" />
+                            <div>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input asp-for="Password" type="password" name="Password" class="form-control" placeholder="Password" />
+                            <div>
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-block">LOGIN</button>
+                        </div>
+                        <div class="form-group">
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-secondary btn-block">CANCEL</a>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-muted">
+                   @if (ViewBag.Registered == null)
+                   {
+                     <span>Not Registered?</span>
+                     <a asp-controller="Account" asp-action="Register">Create an account</a>
+                   }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/node_modules/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/node_modules/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+}
