@@ -30,7 +30,7 @@ services:
       depends_on:
          - db
       build:
-         context: './src'
+         context: '.'
          dockerfile: Dockerfile
       ports:
          - 8080:80

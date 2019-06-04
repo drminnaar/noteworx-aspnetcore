@@ -11,7 +11,7 @@ RUN apt-get update && \
    rm -rf /var/lib/apt/lists/ && \
    npm install -g gulp
 WORKDIR /src
-COPY . .
+COPY ./src .
 WORKDIR /src/NoteWorx.Web
 RUN npm install \
    && dotnet restore \
