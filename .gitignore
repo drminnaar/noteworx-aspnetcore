@@ -333,3 +333,4 @@ ASALocalRun/
 
 # Visual Studio Code
 .vscode/
+src/NoteWorx.Web/wwwroot/lib/
