@@ -1,8 +1,8 @@
-namespace System.Collections.Generic
+﻿namespace System.Collections.Generic
 {
    public sealed class PagedList<T> : IPagedList<T>
    {
-      private readonly List<T> _list = new List<T>();
+      private readonly List<T> _list = new();
 
       public PagedList(
          IReadOnlyList<T> items,
@@ -19,7 +19,7 @@ namespace System.Collections.Generic
             _list.AddRange(items);
       }
 
-      public static IPagedList<T> Empty => new PagedList<T>(new T[0], 0, 0, 0);
+      public static IPagedList<T> Empty => new PagedList<T>(Array.Empty<T>(), 0, 0, 0);
 
       public int ItemCount { get; private set; }
 

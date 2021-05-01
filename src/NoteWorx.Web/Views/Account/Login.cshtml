@@ -1,8 +1,6 @@
 @model LoginViewModel
 
-@{
-    ViewData["Title"] = "Login";
-}
+@{ ViewData["Title"] = "Login"; }
 
 <div>
     <div class="light-overlay">
@@ -18,14 +16,14 @@
                     </div>
                 </div>
                 <div class="card-body">
-                   @if (ViewBag.Registered != null && ViewBag.Registered)
-                   {
-                      <p class="lead my-3 text-success text-center">You have registered successfully!</p>
-                   }
+                    @if (ViewBag.Registered != null && ViewBag.Registered)
+                    {
+                        <p class="lead my-3 text-success text-center">You have registered successfully!</p>
+                    }
                     <form asp-controller="Account" asp-action="Login" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <div class="form-group">
-                           <input asp-for="Email" type="text" name="Email" class="form-control" placeholder="Email" />
+                            <input asp-for="Email" type="text" name="Email" class="form-control" placeholder="Email" />
                             <div>
                                 <span asp-validation-for="Email" class="text-danger small"></span>
                             </div>
@@ -45,11 +43,11 @@
                     </form>
                 </div>
                 <div class="card-footer text-muted">
-                   @if (ViewBag.Registered == null)
-                   {
-                     <span>Not Registered?</span>
-                     <a asp-controller="Account" asp-action="Register">Create an account</a>
-                   }
+                    @if (ViewBag.Registered == null)
+                    {
+                        <span>Not Registered?</span>
+                        <a asp-controller="Account" asp-action="Register">Create an account</a>
+                    }
                 </div>
             </div>
         </div>

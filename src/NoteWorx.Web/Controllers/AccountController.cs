@@ -1,13 +1,13 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using NoteWorx.Infrastructure.Data.Models;
+using NoteWorx.Identity.Data.Models;
 using NoteWorx.Web.ViewModels.Account;
 
 namespace NoteWorx.Web.Controllers
 {
-   public sealed class AccountController : Controller
+    public sealed class AccountController : Controller
    {
       private readonly UserManager<AppUser> _userManager;
       private readonly SignInManager<AppUser> _signInManager;
@@ -45,9 +45,7 @@ namespace NoteWorx.Web.Controllers
       }
 
       [HttpPost]
-      public async Task<IActionResult> Login(
-         LoginViewModel loginViewModel,
-         string returnUrl = null)
+      public async Task<IActionResult> Login(LoginViewModel loginViewModel, string? returnUrl = null)
       {
          ViewData["ReturnUrl"] = returnUrl;
 

@@ -1,63 +1,60 @@
 ﻿using System.IO;
 using System.Reflection;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using NoteWorx.Infrastructure.Data;
+using Microsoft.Extensions.Hosting;
+using NoteWorx.Notes.Data;
 
 namespace NoteWorx.Web
 {
-   public class Program
-   {
-      public static void Main(string[] args)
-      {
-         var host = BuildWebHost(args);
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            var host = BuildWebHost(args);
+            SeedDb(host);
+            host.Run();
+        }
 
-         SeedDb(host);
+        private static void SeedDb(IHost host)
+        {
+            var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
 
-         host.Run();
-      }
+            using var scope = scopeFactory.CreateScope();
 
-      private static void SeedDb(IWebHost host)
-      {
-         var scopeFactory = host.Services.GetService<IServiceScopeFactory>();
+            var environment = scope.ServiceProvider.GetService<IWebHostEnvironment>();
 
-         using (var scope = scopeFactory.CreateScope())
-         {
-            var environment = scope.ServiceProvider.GetService<IHostingEnvironment>();
-
-            // TODO: Uncomment the following code to limit 
+            // TODO: Uncomment the following code to limit
             // database seeding to development
 
             // if (!environment.IsDevelopment())
             //    return;
 
-            var executingPath = Path.GetDirectoryName(
-               Assembly.GetExecutingAssembly().Location);
+            var executingPath = Path
+                .GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+                ?? string.Empty;
 
             var usersFilePath = Path.Combine(executingPath, "users.json");
 
             var notesFilePath = Path.Combine(executingPath, "notes.json");
 
-            var tagsFilePath = Path.Combine(executingPath, "tags.json");
-
             var seeder = scope
                .ServiceProvider
-               .GetService<Seeder>()
+               .GetRequiredService<Seeder>()
                .IncludeUsers(usersFilePath)
-               .IncludeTags(tagsFilePath)
                .IncludeNotes(notesFilePath);
 
             seeder.Seed();
-         }
-      }
+        }
 
-      public static IWebHost BuildWebHost(string[] args)
-      {
-         return WebHost.CreateDefaultBuilder()
-             .UseKestrel()
-             .UseStartup<Startup>()
-             .Build();
-      }
-   }
+        public static IHost BuildWebHost(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                })
+                .Build();
+        }
+    }
 }

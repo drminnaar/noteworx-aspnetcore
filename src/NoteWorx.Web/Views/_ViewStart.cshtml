@@ -1,13 +1,13 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@using NoteWorx.Infrastructure.Data.Models
+@using NoteWorx.Identity.Data.Models
 
 @inject SignInManager<AppUser> SignInManager
 
 @if (SignInManager.IsSignedIn(User))
 {
-   Layout = "_AuthLayout";
+    Layout = "_AuthLayout";
 }
 else
 {
-   Layout = "_Layout";
+    Layout = "_Layout";
 }

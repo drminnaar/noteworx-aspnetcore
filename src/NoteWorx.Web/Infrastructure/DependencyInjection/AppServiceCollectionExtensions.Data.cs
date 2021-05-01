@@ -1,48 +1,38 @@
-using System.Reflection;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NoteWorx.Infrastructure.Data;
-using NoteWorx.Infrastructure.Data.Commands;
-using NoteWorx.Infrastructure.Data.Queries;
-using NoteWorx.Infrastructure.Data.Repositories;
+using Microsoft.Extensions.Hosting;
+using NoteWorx.Notes.Data;
 
 namespace NoteWorx.Web.Infrastructure.DependencyInjection
 {
-   internal static partial class AppServiceCollectionExtensions
-   {
-      private static IServiceCollection ConfigureDataServices(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        IHostingEnvironment hostingEnvironment)
-      {
-         services.AddDbContext<NoteWorxDbContext>(options =>
-         {
-            options.UseNpgsql(
-               configuration.GetConnectionString("NoteWorx"),
-               builder =>
-               {
-                  var assembly = Assembly
-                     .GetAssembly(typeof(NoteWorxDbContext))
-                     .FullName;
+    internal static partial class AppServiceCollectionExtensions
+    {
+        private static IServiceCollection ConfigureDataServices(
+          this IServiceCollection services,
+          IConfiguration configuration,
+          IWebHostEnvironment hostingEnvironment)
+        {
+            services.AddDbContext<NoteWorxDbContext>(options =>
+            {
+                options.UseNpgsql(
+                configuration.GetConnectionString("NoteWorx"),
+                builder =>
+                {
+                    var assembly = typeof(NoteWorxDbContext).Assembly.FullName;
 
-                  builder.MigrationsAssembly(assembly);
-               });
+                    builder.MigrationsAssembly(assembly);
+                });
 
-            if (hostingEnvironment.IsDevelopment())
-               options.EnableSensitiveDataLogging();
-         });
+                if (hostingEnvironment.IsDevelopment())
+                    options.EnableSensitiveDataLogging();
+            });
 
-         services.AddScoped<Seeder>();
-         services.AddScoped<INoteQuery, NoteQuery>();
-         services.AddScoped<IAddNoteCommand, AddNoteCommand>();
-         services.AddScoped<IAddTagsCommand, AddTagsCommand>();
-         services.AddScoped<IDeleteNotesCommand, DeleteNotesCommand>();
-         services.AddScoped<IUpdateNoteCommand, UpdateNoteCommand>();
-         services.AddScoped<INoteRepository, NoteRepository>();
+            services.AddScoped<Seeder>();
+            services.AddScoped<NoteDao, NoteDao>();
 
-         return services;
-      }
-   }
+            return services;
+        }
+    }
 }

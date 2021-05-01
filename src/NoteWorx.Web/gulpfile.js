@@ -1,17 +1,17 @@
+const { series, parallel, src, dest } = require('gulp');
+const rimraf = require("rimraf");
+const concat = require("gulp-concat");
+const cssmin = require("gulp-cssmin");
+const uglify = require("gulp-uglify");
+const rename = require("gulp-rename");
 
-"use strict";
-
-var gulp = require("gulp"),
-   rimraf = require("rimraf"),
-   concat = require("gulp-concat"),
-   cssmin = require("gulp-cssmin"),
-   uglify = require("gulp-uglify"),
-   rename = require("gulp-rename"),
-   sequence = require("gulp-sequence");
+//
+// Configure Paths
+//
 
 var paths = {
-   webroot: "./wwwroot/",
-   nodemodules: "./node_modules/"
+    webroot: "./wwwroot/",
+    nodemodules: "./node_modules/"
 };
 
 paths.js = paths.webroot + "js/**/*.js";
@@ -25,71 +25,79 @@ paths.libCss = paths.lib + "css";
 paths.libJs = paths.lib + "js";
 paths.libWebfonts = paths.lib + "webfonts";
 
-gulp.task("clean:js", function (cb) {
-   rimraf(paths.concatJsDest, cb);
-});
+//
+// Define Private Clean Tasks
+//
 
-gulp.task("clean:css", function (cb) {
-   rimraf(paths.concatCssDest, cb);
-});
+function cleanJs(cb) {
+    rimraf(paths.concatJsDest, cb);
+}
 
-gulp.task("clean:libs", function (cb) {
-   rimraf(paths.lib, cb);
-});
+function cleanCss(cb) {
+    rimraf(paths.concatCssDest, cb);
+}
 
-gulp.task("clean", ["clean:js", "clean:css", "clean:libs"]);
+function cleanLibs(cb) {
+    rimraf(paths.lib, cb);
+}
 
-gulp.task("min:js", function () {
-   return gulp.src([paths.js, "!" + paths.minJs], { base: "." })
-      .pipe(concat(paths.concatJsDest))
-      .pipe(uglify())
-      .pipe(gulp.dest("."));
-});
+//
+// Define Private Minify Tasks
+//
 
-gulp.task("min:css", function () {
-   return gulp.src([paths.css, "!" + paths.minCss])
-      .pipe(concat(paths.concatCssDest))
-      .pipe(cssmin())
-      .pipe(gulp.dest("."));
-});
+function minifyJs() {
+    return src([paths.js, "!" + paths.minJs], { base: "." })
+        .pipe(concat(paths.concatJsDest))
+        .pipe(uglify())
+        .pipe(dest("."));
+}
 
-gulp.task("min", ["min:js", "min:css"]);
+function minifyCss() {
+    return src([paths.css, "!" + paths.minCss])
+        .pipe(concat(paths.concatCssDest))
+        .pipe(cssmin())
+        .pipe(dest("."));
+}
 
-gulp.task("copy:fontawesomeCss", function () {
-   return gulp
-      .src(paths.nodemodules + "@fortawesome/fontawesome-free/css/all.min.css")
-      .pipe(rename("./font-awesome.min.css"))
-      .pipe(gulp.dest(paths.libCss));
-});
+//
+// Define Private Copy Tasks
+//
 
-gulp.task("copy:bootstrapCss", function () {
-   return gulp
-      .src(paths.nodemodules + "bootstrap/dist/css/bootstrap.min.css")
-      .pipe(gulp.dest(paths.libCss));
-});
+function copyFontawesomeCss() {
+    return src(paths.nodemodules + "@fortawesome/fontawesome-free/css/all.min.css")
+        .pipe(rename("./font-awesome.min.css"))
+        .pipe(dest(paths.libCss));
+}
 
-gulp.task("copy:csslibs", ["copy:fontawesomeCss", "copy:bootstrapCss"]);
+function copyBootstrapCss() {
+    return src(paths.nodemodules + "bootstrap/dist/css/bootstrap.min.css")
+        .pipe(dest(paths.libCss));
+}
 
-gulp.task("copy:jslibs", function () {
-   return gulp
-      .src([
-         paths.nodemodules + "jquery/dist/jquery.min.js",
-         paths.nodemodules + "jquery-validation/dist/jquery.validate.min.js",
-         paths.nodemodules + "jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js",
-         paths.nodemodules + "bootstrap/dist/js/bootstrap.min.js",
-         paths.nodemodules + "popper.js/dist/popper.min.js"
-      ])
-      .pipe(gulp.dest(paths.libJs));
-});
+function copyJslibs() {
+    return src([
+            paths.nodemodules + "jquery/dist/jquery.min.js",
+            paths.nodemodules + "jquery-validation/dist/jquery.validate.min.js",
+            paths.nodemodules + "jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js",
+            paths.nodemodules + "bootstrap/dist/js/bootstrap.min.js",
+            paths.nodemodules + "popper.js/dist/popper.min.js"
+        ])
+        .pipe(dest(paths.libJs));
+}
 
-gulp.task("copy:fonts", function () {
-   return gulp
-      .src(paths.nodemodules + "@fortawesome/fontawesome-free/webfonts/**/*")
-      .pipe(gulp.dest(paths.libWebfonts));
-});
+function copyFonts() {
+    return src(paths.nodemodules + "@fortawesome/fontawesome-free/webfonts/**/*")
+        .pipe(dest(paths.libWebfonts));
+}
 
-gulp.task("copy", ["copy:csslibs", "copy:jslibs", "copy:fonts"]);
+//
+// Define Public Tasks
+//
 
-gulp.task("build", sequence("clean", "min", "copy"));
-
-gulp.task("default", ["build"]);
+exports.clean = parallel(cleanCss, cleanJs, cleanLibs);
+exports.minify = parallel(minifyCss, minifyJs);
+exports.copy = parallel(copyBootstrapCss, copyFontawesomeCss, copyFonts, copyJslibs);
+exports.default = series(
+    parallel(cleanCss, cleanJs, cleanLibs),
+    parallel(minifyCss, minifyJs),
+    parallel(copyBootstrapCss, copyFontawesomeCss, copyFonts, copyJslibs));

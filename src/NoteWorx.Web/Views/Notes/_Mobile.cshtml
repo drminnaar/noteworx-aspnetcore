@@ -1,35 +1,35 @@
 @model NotesViewModel
 
 <div class="show-mobile">
-   <div class="list-group">
-      @foreach(var note in Model.Notes)
-      {
-         <div class="list-group-item flex-column align-items-start">
-            <div>
-               <div class="text-right">
-               <label class="switch">
-                  <input type="checkbox"
-                     id="note-@note.Id"
-                     data-note-id="@note.Id"
-                     onclick="toggleSelectedNote()">
-                  
-                  <span class="slider round"></span>
-               </label>
-               </div>
-               <a asp-controller="Notes" 
-                  asp-action="EditNote"
-                  asp-route-noteId="@note.Id"
-                  class="list-group-item-action float-right">
-                  
-                  <div class="d-flex w-100 justify-content-between">                  
-                     <h6 class="mb-1 text-truncate pr-2">@note.Title</h6>
-                     <small>@note.ModifiedAt.Humanize()</small>
-                  </div>
-                  
-                  <p class="mb-1">@note.Description.Truncate(100)</p>
-               </a>
+    <div class="list-group">
+        @foreach (var note in Model.Notes)
+        {
+            <div class="list-group-item flex-column align-items-start">
+                <div>
+                    <div class="text-right">
+                        <label class="switch">
+                            <input type="checkbox"
+                                   id="note-@note.Id"
+                                   data-note-id="@note.Id"
+                                   onclick="toggleSelectedNote()">
+
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <a asp-controller="Notes"
+                       asp-action="EditNote"
+                       asp-route-noteId="@note.Id"
+                       class="list-group-item-action float-right">
+
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1 text-truncate pr-2">@note.Title</h6>
+                            <small>@note.ModifiedAt.Humanize()</small>
+                        </div>
+
+                        <p class="mb-1">@note.Description.Truncate(100)</p>
+                    </a>
+                </div>
             </div>
-         </div>         
-      }      
-   </div>
+        }
+    </div>
 </div>

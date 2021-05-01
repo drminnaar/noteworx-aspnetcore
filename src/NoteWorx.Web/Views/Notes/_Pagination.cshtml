@@ -7,9 +7,9 @@
             var previousPageClass = Model.HasPrevious
                ? "page-item"
                : "page-item disabled";
-            
+
             <li class="@previousPageClass">
-               <a asp-controller="Notes" 
+               <a asp-controller="Notes"
                   asp-action="Index"
                   asp-route-pageNumber="@Model.PreviousPageNumber"
                   asp-route-search="@ViewBag.Search"
@@ -18,8 +18,8 @@
                   <i class="fas fa-angle-left"></i>
                </a>
             </li>
-         
-            
+
+
 
             var nextPageClass = Model.HasNext
                ? "page-item"

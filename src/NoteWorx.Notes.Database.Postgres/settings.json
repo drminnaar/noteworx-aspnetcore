@@ -1,0 +1,5 @@
+{
+    "ConnectionStrings": {
+        "default": "server=localhost;database=noteworx;port=5432;user id=postgres;password=password"
+    }
+}

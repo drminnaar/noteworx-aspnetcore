@@ -1,182 +1,188 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using NoteWorx.Infrastructure.Data.Models;
-using NoteWorx.Infrastructure.Data.Repositories;
+using NoteWorx.Identity.Data.Models;
+using NoteWorx.Notes.Data;
+using NoteWorx.Notes.Data.Models;
 using NoteWorx.Web.Models.Notes;
 using NoteWorx.Web.ViewModels.Notes;
 
 namespace NoteWorx.Web.Controllers
 {
-   [Authorize]
-   public sealed class NotesController : Controller
-   {
-      private readonly INoteRepository _noteRepository;
-      public NotesController(INoteRepository noteRepository)
-      {
-         _noteRepository = noteRepository
-            ?? throw new ArgumentNullException(nameof(noteRepository));
-      }
+    [Authorize]
+    public sealed class NotesController : Controller
+    {
+        internal static readonly string Name = nameof(NotesController).Replace("Controller", "");
 
-      internal static readonly string Name =
-         nameof(NotesController).Replace("Controller", "");
+        private readonly NoteDao _noteDao;
+        private readonly UserManager<AppUser> _userManager;
 
-      [HttpGet]
-      public async Task<IActionResult> Index(
-         string tag = null, string search = null)
-      {
-         ViewBag.Search = search;
-         ViewBag.Tag = tag;
+        public NotesController(NoteDao noteDao, UserManager<AppUser> userManager)
+        {
+            _noteDao = noteDao ?? throw new ArgumentNullException(nameof(noteDao));
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        }
 
-         var noteQueryParams = new NoteQueryParams(User.Identity.Name);
-         noteQueryParams.Tag = tag;
-         noteQueryParams.Search = search;
+        [HttpGet]
+        public IActionResult AddNote()
+        {
+            return View(new AddNoteViewModel());
+        }
 
-         var notes = await _noteRepository.GetNotesAsync(noteQueryParams);
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddNote(AddNoteViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+                return View(viewModel);
 
-         var noteModels = notes.Select(n => (NoteModel)n).ToList();
+            var user = await _userManager.FindByNameAsync(User.Identity?.Name);
 
-         foreach (var noteModel in noteModels)
-         {
-            noteModel.Tags = notes
-               .FirstOrDefault(n => n.Id == noteModel.Id)
-               ?.NoteTags
-               ?.Select(nt => (TagModel)nt.Tag)
+            if (user is null)
+                return Unauthorized();
+
+            var tags = viewModel
+               .Tags
+               ?.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
+               ?.Select(tag => tag.Trim().ToLowerInvariant())
                ?.ToList()
-               ?? TagModel.AsEmptyList;
-         }
+               ?? Enumerable.Empty<string>().ToList();
 
-         var pagedNoteModels = new PagedList<NoteModel>(
-            noteModels, notes.ItemCount, notes.PageNumber, notes.PageSize);
-
-         var notesViewModel = new NotesViewModel
-         {
-            Notes = pagedNoteModels,
-            Search = string.Empty
-         };
-
-         return View(notesViewModel);
-      }
-
-      [HttpGet]
-      public IActionResult AddNote()
-      {
-         return View(new AddNoteViewModel());
-      }
-
-      [HttpPost]
-      [ValidateAntiForgeryToken]
-      public async Task<IActionResult> AddNote(AddNoteViewModel addNoteViewModel)
-      {
-         if (addNoteViewModel == null)
-            throw new ArgumentNullException(nameof(addNoteViewModel));
-
-         if (!ModelState.IsValid)
-            return View(addNoteViewModel);
-
-         var tags = addNoteViewModel
-            .Tags
-            ?.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
-            ?.Select(tag => tag.Trim().ToLower())
-            ?.ToList();
-
-         var note = new Note
-         {
-            Title = addNoteViewModel.Title,
-            Description = addNoteViewModel.Description,
-            CreatedAt = DateTimeOffset.Now,
-            ModifiedAt = DateTimeOffset.Now
-         };
-
-         var success = await _noteRepository.AddNote(User.Identity.Name, note, tags);
-
-         if (!success)
-         {
-            ModelState.AddModelError("", "Add note failed due to unexpected error");
-            return View(addNoteViewModel);
-         }
-
-         return RedirectToAction(
-            actionName: nameof(NotesController.Index),
-            controllerName: NotesController.Name);
-      }
-
-      [HttpDelete]
-      public async Task<JsonResult> DeleteNotes(string[] noteIds)
-      {
-         if (noteIds != null && noteIds.Any())
-         {
-            var ids = noteIds
-               .Select(noteId => long.Parse(noteId))
-               .ToList();
-
-            await _noteRepository.DeleteNotes(ids);
-         }
-
-         var redirectUrl = Url.Link(
-            "default",
-            new
+            var note = new Note
             {
-               Controller = NotesController.Name,
-               Action = nameof(NotesController.Index)
+                Title = viewModel.Title,
+                Description = viewModel.Description,
+                UserId = user.Id,
+                Tags = string.Join(',', tags)
+            };
+
+            var success = await _noteDao.SaveNote(note);
+
+            if (!success)
+            {
+                ModelState.AddModelError("", "Add note failed due to unexpected error");
+                return View(viewModel);
+            }
+
+            return RedirectToAction(
+               actionName: nameof(NotesController.Index),
+               controllerName: NotesController.Name);
+        }
+
+        [HttpDelete]
+        public async Task<JsonResult> DeleteNotes(string[] noteIds)
+        {
+            if (noteIds != null && noteIds.Any())
+            {
+                var ids = noteIds
+                   .Select(noteId => long.Parse(noteId))
+                   .ToList();
+
+                await _noteDao.DeleteNotes(ids);
+            }
+
+            var redirectUrl = Url.Link(
+               "default",
+               new
+               {
+                   Controller = NotesController.Name,
+                   Action = nameof(NotesController.Index)
+               });
+
+            return Json(new { Url = redirectUrl });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditNote(long noteId)
+        {
+            var note = await _noteDao.GetNoteById(noteId);
+
+            if (note is null)
+            {
+                return NotFound($"A note having specified id '{noteId}' could not be found.");
+            }
+
+            return View(new EditNoteViewModel
+            {
+                Id = note.Id,
+                Description = note.Description,
+                Title = note.Title,
+                Tags = note.Tags
             });
+        }
 
-         return Json(new { Url = redirectUrl });
-      }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditNote(EditNoteViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+                return View(viewModel);
 
-      [HttpGet]
-      public async Task<IActionResult> EditNote(long noteId)
-      {
-         var note = await _noteRepository.FindNoteById(noteId);
+            var user = await _userManager.FindByNameAsync(User.Identity?.Name);
 
-         if (note == null)
-         {
-            throw new InvalidOperationException(
-               $"A note having specified id '{noteId}' could not be found.");
-         }
+            if (user is null)
+                return Unauthorized();
 
-         var editNoteViewModel = new EditNoteViewModel
-         {
-            Id = note.Id,
-            Description = note.Description,
-            Title = note.Title,
-            Tags = string.Join(", ", note.NoteTags.Select(nt => nt.Tag.Value))
-         };
+            var tags = viewModel
+               .Tags
+               ?.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
+               ?.Select(tag => tag.Trim().ToLowerInvariant())
+               ?.ToList()
+               ?? Enumerable.Empty<string>().ToList();
 
-         return View(editNoteViewModel);
-      }
+            var note = new Note
+            {
+                Id = viewModel.Id,
+                Description = viewModel.Description,
+                Tags = string.Join(',', tags),
+                Title = viewModel.Title,
+                UserId = user.Id
+            };
 
-      [HttpPost]
-      [ValidateAntiForgeryToken]
-      public async Task<IActionResult> EditNote(EditNoteViewModel editNoteViewModel)
-      {
-         if (editNoteViewModel == null)
-            throw new ArgumentNullException(nameof(editNoteViewModel));
+            var success = await _noteDao.SaveNote(note);
 
-         if (!ModelState.IsValid)
-            return View(editNoteViewModel);
+            if (!success)
+            {
+                ModelState.AddModelError("", "Edit note failed due to unexpected error");
+                return View(viewModel);
+            }
 
-         var note = new Note
-         {
-            Id = editNoteViewModel.Id,
-            Description = editNoteViewModel.Description,
-            Title = editNoteViewModel.Title
-         };
+            return RedirectToAction(
+               actionName: nameof(NotesController.Index),
+               controllerName: NotesController.Name);
+        }
 
-         var tags = editNoteViewModel
-            .Tags
-            ?.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
-            ?.Select(tag => tag.Trim().ToLower())
-            ?.ToList();
+        [HttpGet]
+        public async Task<IActionResult> Index(string tag = "", string search = "", int pageNumber = 1)
+        {
+            ViewBag.Search = search;
+            ViewBag.Tag = tag;
 
-         await _noteRepository.Update(note, tags);
+            var notesFromDb = await _noteDao.GetNotes(new NoteQueryOptions
+            {
+                Order = "-modifiedat",
+                PageNumber = pageNumber,
+                PageSize = 5,
+                Tag = tag,
+                Term = search,
+                Username = User.Identity?.Name ?? string.Empty
+            });
+            var noteModels = notesFromDb.Select(n => (NoteModel)n).ToList();
+            var pagedNoteModels = new PagedList<NoteModel>(
+                noteModels,
+                notesFromDb.ItemCount,
+                notesFromDb.PageNumber,
+                notesFromDb.PageSize);
 
-         return RedirectToAction(
-            actionName: nameof(NotesController.Index),
-            controllerName: NotesController.Name);
-      }
-   }
+            return View(new NotesViewModel
+            {
+                Notes = pagedNoteModels,
+                Search = string.Empty
+            });
+        }
+    }
 }

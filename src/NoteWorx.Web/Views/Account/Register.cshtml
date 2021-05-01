@@ -1,8 +1,6 @@
 @model RegisterViewModel
 
-@{
-    ViewData["Title"] = "Register";
-}
+@{ ViewData["Title"] = "Register"; }
 
 <div class="register-container">
     <div class="light-overlay">
@@ -19,7 +17,7 @@
                 </div>
                 <div class="card-body">
                     <form asp-controller="Account" asp-action="Register" method="POST">
-                       <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <div class="form-group">
                             <input asp-for="Email" type="text" name="Email" class="form-control" placeholder="Email" />
                             <div>

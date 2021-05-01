@@ -1,11 +1,11 @@
 ﻿using System;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using NoteWorx.Infrastructure.Data.Models;
+using NoteWorx.Identity.Data.Models;
 
 namespace NoteWorx.Web.Controllers
 {
-   public class HomeController : Controller
+    public class HomeController : Controller
    {
       private readonly SignInManager<AppUser> _signInManager;
 
@@ -14,8 +14,7 @@ namespace NoteWorx.Web.Controllers
 
       public HomeController(SignInManager<AppUser> signInManager)
       {
-         _signInManager = signInManager
-            ?? throw new ArgumentNullException(nameof(signInManager));
+         _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
       }
 
       public IActionResult Index()

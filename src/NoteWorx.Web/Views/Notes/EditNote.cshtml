@@ -17,14 +17,14 @@
             <!-- TITLE -->
             <div class="form-group">
                <label asp-for="Title">Title</label>
-               <input asp-for="Title" type="text" name="Title" class="form-control" placeholder="Enter title here">               
+               <input asp-for="Title" type="text" name="Title" class="form-control" placeholder="Enter title here">
                <div>
-                  <span asp-validation-for="Title" class="text-danger small"></span>                  
+                  <span asp-validation-for="Title" class="text-danger small"></span>
                </div>
             </div>
             <!-- DESCRIPTION -->
             <div class="form-group">
-               <label asp-for="Description">Description</label>               
+               <label asp-for="Description">Description</label>
                <textarea asp-for="Description" name="Description" class="form-control" placeholder="Enter description here" rows="10"></textarea>
                <div>
                   <span asp-validation-for="Description" class="text-danger small"></span>
@@ -32,7 +32,7 @@
             </div>
             <!-- TAGS -->
             <div class="form-group">
-               <label asp-for="Tags">Tags</label>               
+               <label asp-for="Tags">Tags</label>
                <input asp-for="Tags" type="text" name="Tags" class="form-control" placeholder="Enter comma separated list of tags here" rows="10">
                <div>
                   <span asp-validation-for="Tags" class="text-danger small"></span>
